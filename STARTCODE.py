@@ -403,7 +403,6 @@ import matplotlib.pyplot as plt
 
 
 
-
 my_protocol = BB84(eve_intercept='yes')
 
 
@@ -418,14 +417,21 @@ my_protocol.simulator = cirq.Simulator()
 
 
 
-# 0 with no H
+# alice Circuit
 circuit = cirq.Circuit()
 
-circuit.append(cirq.I(signal))
 circuit.append(cirq.I(signal))
 
 my_protocol.alice_send_0_no_H_circuit = circuit
 
+
+
+circuit = cirq.Circuit()
+
+circuit.append(cirq.I(signal))
+circuit.append(cirq.H(signal))
+
+my_protocol.alice_send_0_H_circuit = circuit
 
 
 # Bob's Circuits
@@ -433,10 +439,14 @@ my_protocol.alice_send_0_no_H_circuit = circuit
 # with no H
 circuit = cirq.Circuit()
 
+
 circuit.append(cirq.I(signal))
 circuit.append(cirq.measure(signal))
 
 my_protocol.bob_receive_no_H_circuit = circuit
+
+
+
 
 
 
@@ -463,5 +473,16 @@ pccm.append(
 pccm.append(
     cirq.CNOT(signal,eve)
 )
+
+my_protocol.alice_send_0_H_circuit
+circuit+=pccm
+my_protocol.bob_receive_no_H_circuit
+
+
+
+
+
+
+
 
 circuit

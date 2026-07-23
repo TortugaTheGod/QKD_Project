@@ -482,5 +482,25 @@ circuit = cirq.Circuit()
 circuit.append(cirq.H(eve))
 circuit.append(cirq.CNOT(signal, eve))
 
-circuit
 
+
+pccm = cirq.Circuit()
+
+pccm.append(cirq.H(signal))
+pccm.append(cirq.H(eve))
+
+
+pccm.append(cirq.CNOT(signal,eve))
+
+
+theta = ??????
+
+pccm.append(
+    cirq.ry(theta)(eve)
+)
+
+pccm.append(
+    cirq.CNOT(signal,eve)
+)
+
+pccm

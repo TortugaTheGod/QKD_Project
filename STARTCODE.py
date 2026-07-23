@@ -448,6 +448,8 @@ my_protocol.bob_receive_no_H_circuit = circuit
 
 
 
+
+
 circuit = cirq.Circuit()
 
 
@@ -459,11 +461,17 @@ pccm = cirq.Circuit()
 
 pccm.append(cirq.CNOT(signal,eve))
 
-theta = np.arccos(1/np.sqrt(2))
+theta1 = np.cos(1/np.sqrt(2))
+
+theta2 = np.sin(1/np.sqrt(2))
+
+theta3 = -(np.cos(1/np.sqrt(2)))
+
+theta4 = -(np.sin(1/np.sqrt(2)))
 
 angleChange=1
 
-pccm.append(cirq.ry(theta*angleChange)(eve))
+pccm.append(cirq.ry(theta1*angleChange)(eve))
 
 pccm.append(cirq.CNOT(signal,eve))
 

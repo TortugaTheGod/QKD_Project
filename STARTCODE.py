@@ -403,8 +403,6 @@ import matplotlib.pyplot as plt
 
 
 
-
-
 my_protocol = BB84(eve_intercept='yes')
 
 
@@ -418,43 +416,22 @@ my_protocol.qubit = signal
 my_protocol.simulator = cirq.Simulator()
 
 
-# Alice's Circuits
-#==================
-# 0 with no H
+
+# alice Circuit
 circuit = cirq.Circuit()
 
-circuit.append(cirq.I(my_protocol.qubit))
-circuit.append(cirq.I(my_protocol.qubit))
+circuit.append(cirq.I(signal))
 
 my_protocol.alice_send_0_no_H_circuit = circuit
 
-my_protocol.alice_send_0_H_circuit = circuit
 
-# 1 with no H
+
 circuit = cirq.Circuit()
 
-circuit.append(cirq.X(my_protocol.qubit))
-circuit.append(cirq.I(my_protocol.qubit))
-
-my_protocol.alice_send_1_no_H_circuit = circuit
-
-
-# 0 with H
-circuit = cirq.Circuit()
-
-circuit.append(cirq.I(my_protocol.qubit))
-circuit.append(cirq.H(my_protocol.qubit))
+circuit.append(cirq.I(signal))
+circuit.append(cirq.H(signal))
 
 my_protocol.alice_send_0_H_circuit = circuit
-
-
-# 1 with H
-circuit = cirq.Circuit()
-
-circuit.append(cirq.X(my_protocol.qubit))
-circuit.append(cirq.H(my_protocol.qubit))
-
-my_protocol.alice_send_1_H_circuit = circuit
 
 
 # Bob's Circuits
@@ -462,45 +439,51 @@ my_protocol.alice_send_1_H_circuit = circuit
 # with no H
 circuit = cirq.Circuit()
 
-circuit.append(cirq.I(my_protocol.qubit))
-circuit.append(cirq.measure(my_protocol.qubit))
+
+circuit.append(cirq.I(signal))
+circuit.append(cirq.measure(signal))
 
 my_protocol.bob_receive_no_H_circuit = circuit
 
-# with H
-circuit = cirq.Circuit()
 
-circuit.append(cirq.H(my_protocol.qubit))
-circuit.append(cirq.measure(my_protocol.qubit))
 
-my_protocol.bob_receive_H_circuit = circuit
 
 
 
 circuit = cirq.Circuit()
 
-circuit.append(cirq.H(eve))
-circuit.append(cirq.CNOT(signal, eve))
+
+import numpy as np
 
 
 
 pccm = cirq.Circuit()
 
-pccm.append(cirq.H(signal))
-pccm.append(cirq.H(eve))
+pccm.append(cirq.CNOT(signal,eve))
 
+theta1 = np.cos(1/np.sqrt(2))
+
+theta2 = np.sin(1/np.sqrt(2))
+
+theta3 = -(np.cos(1/np.sqrt(2)))
+
+theta4 = -(np.sin(1/np.sqrt(2)))
+
+angleChange=1
+
+pccm.append(cirq.ry(theta1*angleChange)(eve))
 
 pccm.append(cirq.CNOT(signal,eve))
 
 
-theta = ??????
+fid = cirq.Circuit()
 
-pccm.append(
-    cirq.ry(theta)(eve)
-)
+fid += my_protocol.alice_send_0_H_circuit
+fid += pccm
 
-pccm.append(
-    cirq.CNOT(signal,eve)
-)
+sim = cirq.Simulator()
 
-pccm
+result = sim.simulate(fid)
+state = result.final_state_vector
+state=np.abs(state)**2
+state

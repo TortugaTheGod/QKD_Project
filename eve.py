@@ -1,77 +1,26 @@
-from STARTCODE import BB84, cirq
-my_protocol = BB84(eve_intercept = 'yes')
+import numpy as np
+import cirq
+from scipy.optimize import minimize # for cobyla
 
-# BB84 object for eve to intercept
-#==================
-# Qubit and Simulator
-#==================
-my_protocol.qubit = cirq.NamedQubit('q0')
-my_protocol.simulator = cirq.Simulator()
+qubits = cirq.NamedQubit.range(2, prefix = 'q')
+sim = cirq.Simulator()
 
 
-# Alice's Circuits
-#==================
-# 0 with no H
-circuit = cirq.Circuit()
+# Prepare Alice state
 
-circuit.append(cirq.I(my_protocol.qubit))
-circuit.append(cirq.I(my_protocol.qubit))
+def eve_unitary_circuit(circuit, theta, layers):
+    start = 0
+    for i in range(layers): # for n layers, appends rx, ry, rz for qubit 0 and 1, then CNOT gate
+        circuit.append(cirq.rx(theta[start + 0]).on(qubits[0]))
+        circuit.append(cirq.ry(theta[start + 1]).on(qubits[0]))
+        circuit.append(cirq.rz(theta[start + 2]).on(qubits[0]))
 
-my_protocol.alice_send_0_no_H_circuit = circuit
+        circuit.append(cirq.rx(theta[start + 3]).on(qubits[1]))
+        circuit.append(cirq.ry(theta[start + 4]).on(qubits[1]))
+        circuit.append(cirq.rz(theta[start + 5]).on(qubits[1]))
 
-
-# 1 with no H
-circuit = cirq.Circuit()
-
-circuit.append(cirq.X(my_protocol.qubit))
-circuit.append(cirq.I(my_protocol.qubit))
-
-my_protocol.alice_send_1_no_H_circuit = circuit
+        circuit.append(cirq.CNOT(qubits[0], qubits[1]))
+        idx += 6
 
 
-# 0 with H
-circuit = cirq.Circuit()
-
-circuit.append(cirq.I(my_protocol.qubit))
-circuit.append(cirq.H(my_protocol.qubit))
-
-my_protocol.alice_send_0_H_circuit = circuit
-
-
-# 1 with H
-circuit = cirq.Circuit()
-
-circuit.append(cirq.X(my_protocol.qubit))
-circuit.append(cirq.H(my_protocol.qubit))
-
-my_protocol.alice_send_1_H_circuit = circuit
-
-
-# Bob's Circuits
-#==================
-# with no H
-circuit = cirq.Circuit()
-
-circuit.append(cirq.I(my_protocol.qubit))
-circuit.append(cirq.measure(my_protocol.qubit))
-
-my_protocol.bob_receive_no_H_circuit = circuit
-
-# with H
-circuit = cirq.Circuit()
-
-circuit.append(cirq.H(my_protocol.qubit))
-circuit.append(cirq.measure(my_protocol.qubit))
-
-my_protocol.bob_receive_H_circuit = circuit
-
-# Eve's Circuits
-#==================
-circuit = cirq.Circuit()
-
-circuit.append(cirq.measure(my_protocol.qubit, key = 'eve'))
-
-my_protocol.eve_intercept_circuit = circuit
-
-# Sending qubits from alice to bob
-my_protocol.send_bit(alice_bit = 0, does_alice_apply_H = 'no', does_bob_apply_H = 'no', compare_bits = 'no')
+# eve V(Λ), i don't know what this is

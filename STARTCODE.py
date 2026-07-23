@@ -1,5 +1,7 @@
 # @title
 import warnings
+
+
 warnings.filterwarnings('ignore')
 
 
@@ -402,12 +404,10 @@ class BB84:
 import matplotlib.pyplot as plt
 
 
-
 my_protocol = BB84(eve_intercept='yes')
 
 
-# Qubit and Simulator
-#==================
+
 my_qubits = cirq.NamedQubit.range(2, prefix='q')
 
 signal = my_qubits[0]
@@ -434,9 +434,7 @@ circuit.append(cirq.H(signal))
 my_protocol.alice_send_0_H_circuit = circuit
 
 
-# Bob's Circuits
-#==================
-# with no H
+# bob circ
 circuit = cirq.Circuit()
 
 
@@ -444,8 +442,6 @@ circuit.append(cirq.I(signal))
 circuit.append(cirq.measure(signal))
 
 my_protocol.bob_receive_no_H_circuit = circuit
-
-
 
 
 
@@ -467,7 +463,7 @@ theta2 = np.sin(1/np.sqrt(2))
 
 theta3 = -(np.cos(1/np.sqrt(2)))
 
-theta4 = -(np.sin(1/np.sqrt(2)))
+
 
 angleChange=1
 

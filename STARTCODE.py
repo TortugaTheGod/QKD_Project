@@ -448,7 +448,6 @@ my_protocol.bob_receive_no_H_circuit = circuit
 
 
 
-
 circuit = cirq.Circuit()
 
 
@@ -458,27 +457,25 @@ import numpy as np
 
 pccm = cirq.Circuit()
 
-pccm.append(cirq.H(signal))
-pccm.append(cirq.H(eve))
-
-
 pccm.append(cirq.CNOT(signal,eve))
 
 theta = np.arccos(1/np.sqrt(2))
 
+angleChange=1
+
+pccm.append(cirq.ry(theta*angleChange)(eve))
+
+pccm.append(cirq.CNOT(signal,eve))
 
 
-pccm.append(
-    cirq.ry(theta)(eve)
-)
+fid = cirq.Circuit()
 
-pccm.append(
-    cirq.CNOT(signal,eve)
-)
+fid += my_protocol.alice_send_0_H_circuit
+fid += pccm
 
-circuit += my_protocol.alice_send_0_H_circuit
-circuit+=pccm
-circuit += my_protocol.bob_receive_no_H_circuit
+sim = cirq.Simulator()
 
-circuit
-
+result = sim.simulate(fid)
+state = result.final_state_vector
+state=np.abs(state)**2
+state

@@ -449,6 +449,8 @@ my_protocol.bob_receive_no_H_circuit = circuit
 
 
 
+circuit = cirq.Circuit()
+
 
 import numpy as np
 
@@ -474,15 +476,9 @@ pccm.append(
     cirq.CNOT(signal,eve)
 )
 
-my_protocol.alice_send_0_H_circuit
+circuit += my_protocol.alice_send_0_H_circuit
 circuit+=pccm
-my_protocol.bob_receive_no_H_circuit
-
-
-
-
-
-
-
+circuit += my_protocol.bob_receive_no_H_circuit
 
 circuit
+

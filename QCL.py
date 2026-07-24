@@ -84,18 +84,12 @@ fid = cirq.Circuit()
 fid += my_protocol.alice_send_0_H_circuit
 fid += pccm
 """
-Pure Fidelity (if you have state vectors)
-psi = psi / np.linalg.norm(psi)
-phi = phi / np.linalg.norm(phi)
-fidelity = float(np.abs(np.vdot(psi, phi)) ** 2)
-
-Density Fidelity (if you have density matrices)
+Fidelity
 given matrix rho_a and rho_b, 
 fidelity = np.trace(np.sqrt(np.sqrt(rho_a) * rho_b * np.sqrt(rho_a)))**2
 
 def loss_function(theta, lambda):
   return (10*(fidelity_alice_bob - target)**2 - fidelity_alice_eve
-
 """
 result = sim.simulate(fid)
 state = result.final_state_vector

@@ -8,7 +8,7 @@ signal = my_qubits[0]
 eve = my_qubits[1]
 ancilla = my_qubits[2]
 my_protocol.qubit = signal
-my_protocol.simulator = cirq.Simulator()
+my_protocol.simulator = cirq.DensityMatrixSimulator()
 
 
 
@@ -39,7 +39,7 @@ circuit.append(cirq.measure(signal))
 my_protocol.bob_receive_no_H_circuit = circuit
 
 
-sim = cirq.Simulator()
+sim = cirq.DensityMatrixSimulator()
 
 circuit = cirq.Circuit()
 
@@ -74,7 +74,14 @@ def loss_function(theta):
 
     result = sim.simulate(circuit)
 
-    fidelity = ???????
+
+    rho = result.final_density_matrix
+
+    bob_rho = cirq.qis.partial_trace(rho,keep_indices=[0])
+    target_state = np.array([1/np.sqrt(2),1/np.sqrt(2) ])
+
+    fidelity = cirq.fidelity(bob_rho,target_state)
+
     return fidelity
 
 circuit = cirq.Circuit()
@@ -91,7 +98,9 @@ fidelity = np.trace(np.sqrt(np.sqrt(rho_a) * rho_b * np.sqrt(rho_a)))**2
 def loss_function(theta, lambda):
   return (10*(fidelity_alice_bob - target)**2 - fidelity_alice_eve
 """
-result = sim.simulate(fid)
-state = result.final_state_vector
+result = sim.simulate(circuit)
+
+rho = result.final_density_matrix
+
 state=np.abs(state)**2
 state

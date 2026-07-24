@@ -8,7 +8,7 @@ sim = cirq.Simulator()
 
 # Prepare Alice state
 
-def eve_unitary_circuit(circuit, theta, layers):
+def eve_hea_unitary_circuit(circuit, theta, layers):
     start = 0
     for i in range(layers): # for n layers, appends rx, ry, rz for qubit 0 and 1, then CNOT gate
         circuit.append(cirq.rx(theta[start + 0]).on(qubits[0]))

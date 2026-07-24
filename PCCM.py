@@ -75,7 +75,7 @@ pccm.append(cirq.CNOT(signal,eve))
 pccm.append(cirq.CNOT(signal,ancilla))
 
 
-
+circuit = cirq.Circuit()
 
 fid = cirq.Circuit()
 

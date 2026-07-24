@@ -83,9 +83,16 @@ fid = cirq.Circuit()
 
 fid += my_protocol.alice_send_0_H_circuit
 fid += pccm
+"""
+Pure Fidelity (if you have state vectors)
+psi = psi / np.linalg.norm(psi)
+phi = phi / np.linalg.norm(phi)
+fidelity = float(np.abs(np.vdot(psi, phi)) ** 2)
 
-
-
+Density Fidelity (if you have density matrices)
+given matrix rho_a and rho_b, 
+fidelity = np.trace(np.sqrt(np.sqrt(rho_a) * rho_b * np.sqrt(rho_a)))**2
+"""
 result = sim.simulate(fid)
 state = result.final_state_vector
 state=np.abs(state)**2

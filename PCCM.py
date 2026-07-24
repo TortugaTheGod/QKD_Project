@@ -2,10 +2,11 @@ my_protocol = BB84(eve_intercept='yes')
 
 
 
-my_qubits = cirq.NamedQubit.range(2, prefix='q')
+my_qubits = cirq.NamedQubit.range(3, prefix='q')
 
 signal = my_qubits[0]
 eve = my_qubits[1]
+ancilla = my_qubits[2]
 my_protocol.qubit = signal
 my_protocol.simulator = cirq.Simulator()
 
@@ -48,9 +49,6 @@ import numpy as np
 
 
 pccm = cirq.Circuit()
-
-pccm.append(cirq.CNOT(signal,eve))
-
 theta1 = np.cos(1/np.sqrt(2))
 
 theta2 = np.sin(1/np.sqrt(2))
@@ -58,12 +56,25 @@ theta2 = np.sin(1/np.sqrt(2))
 theta3 = -(np.cos(1/np.sqrt(2)))
 
 
+pccm.append(cirq.ry(theta1*2)(eve))
 
-angleChange=1
+pccm.append(cirq.CNOT(eve,ancilla))
 
-pccm.append(cirq.ry(theta1*angleChange)(eve))
+pccm.append(cirq.ry(theta2*2)(ancilla))
+
+pccm.append(cirq.CNOT(ancilla,eve))
+
+pccm.append(cirq.ry(theta3*2)(eve))
+
+pccm.append(cirq.CNOT(eve,signal))
+
+pccm.append(cirq.CNOT(ancilla,signal))
 
 pccm.append(cirq.CNOT(signal,eve))
+
+pccm.append(cirq.CNOT(signal,ancilla))
+
+
 
 
 fid = cirq.Circuit()

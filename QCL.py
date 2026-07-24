@@ -61,6 +61,8 @@ def build_pccm(theta, alice_used_H=False):
   return pccm
 
  # if bob and alice use H, append H to eve's bit in pccm
+if my_protocol.does_alice_apply_H == "yes" and my_protocol.does_bob_apply_H == "yes":
+    pccm.append(cirq.H(eve))
 
 def loss_function(theta):
     pccm = build_pccm(theta, alice_used_H = True)
@@ -74,10 +76,6 @@ def loss_function(theta):
 
     fidelity = ???????
     return fidelity
-
-
-if my_protocol.does_alice_apply_H == "yes" and my_protocol.does_bob_apply_H == "yes":
-    pccm.append(cirq.H(eve))
 
 circuit = cirq.Circuit()
 

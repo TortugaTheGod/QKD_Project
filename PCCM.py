@@ -49,31 +49,19 @@ import numpy as np
 
 
 pccm = cirq.Circuit()
-theta1 = np.cos(1/np.sqrt(2))
-
-theta2 = np.sin(1/np.sqrt(2))
-
-theta3 = -(np.cos(1/np.sqrt(2)))
 
 
-pccm.append(cirq.ry(theta1*2)(eve))
+theta = 1 #NEEDS TO BE TRAINED 
 
-pccm.append(cirq.CNOT(eve,ancilla))
+pccm.append(cirq.rx(np.pi/2)(signal))
 
-pccm.append(cirq.ry(theta2*2)(ancilla))
+pccm.append(cirq.ry(theta)(eve).controlled_by(signal))
+pccm.append(cirq.ry(-(np.pi/2))(signal).controlled_by(eve))
 
-pccm.append(cirq.CNOT(ancilla,eve))
+pccm.append(cirq.rx(-(np.pi/2))(signal))
+pccm.append(cirq.rx(-(np.pi/2))(signal))
 
-pccm.append(cirq.ry(theta3*2)(eve))
-
-pccm.append(cirq.CNOT(eve,signal))
-
-pccm.append(cirq.CNOT(ancilla,signal))
-
-pccm.append(cirq.CNOT(signal,eve))
-
-pccm.append(cirq.CNOT(signal,ancilla))
-
+ # if bob and alice use H, append H to eve's bit in pccm
 
 circuit = cirq.Circuit()
 

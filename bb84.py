@@ -1,18 +1,4 @@
-# @title
-import warnings
-
-
-warnings.filterwarnings('ignore')
-
-
-try:
-    import cirq
-except ImportError:
-    print('installing cirq...')
-    !pip install cirq --quiet
-    import cirq
-    print('installed cirq.')
-
+import cirq
 
 #!git clone https://github.com/the-codingschool/bb84.git
 #from bb84.bb84 import BB84

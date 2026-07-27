@@ -20,7 +20,7 @@ def eve_hea_unitary_circuit(circuit, theta, layers):
         circuit.append(cirq.rz(theta[start + 5]).on(qubits[1]))
 
         circuit.append(cirq.CNOT(qubits[0], qubits[1]))
-        idx += 6
+        start += 6
 
 
 # eve V(Λ), i don't know what this is

@@ -403,32 +403,36 @@ my_protocol.simulator = cirq.Simulator()
 
 
 
-# alice Circuit
-circuit = cirq.Circuit()
+# alice circuit with 0/1 no H/yes H
+circuit0 = cirq.Circuit()
 
-circuit.append(cirq.I(signal))
+my_protocol.alice_send_0_no_H_circuit = circuit0
+#----------------------------------------------
+circuit0H = cirq.Circuit()
+circuit0H.append(cirq.H(signal))
 
-my_protocol.alice_send_0_no_H_circuit = circuit
+my_protocol.alice_send_0_H_circuit = circuit0H
+#----------------------------------------------
+circuit1 = cirq.Circuit()
+circuit1.append(cirq.X(signal))
 
+my_protocol.alice_send_1_no_H_circuit = circuit1
+#---------------------------------------------
+circuit1H = cirq.Circuit()
+circuit1H.append(cirq.X(signal))
+circuit1H.append(cirq.H(signal))
 
+my_protocol.alice_send_1_H_circuit = circuit1H
+#---------------------------------------------
+# bob Z basis
+bob_no_H = cirq.Circuit()
+my_protocol.bob_receive_no_H_circuit = bob_no_H
 
-circuit = cirq.Circuit()
-
-circuit.append(cirq.I(signal))
-circuit.append(cirq.H(signal))
-
-my_protocol.alice_send_0_H_circuit = circuit
-
-
-# bob circ
-circuit = cirq.Circuit()
-
-
-circuit.append(cirq.I(signal))
-circuit.append(cirq.measure(signal))
-
-my_protocol.bob_receive_no_H_circuit = circuit
-
+# bob X basis
+bob_H = cirq.Circuit()
+bob_H.append(cirq.H(signal))
+bob_H.append(cirq.measure(signal, key = 'q0'))
+my_protocol.bob_receive_H_circuit = bob_H
 
 
 

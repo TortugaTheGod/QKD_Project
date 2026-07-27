@@ -1,3 +1,5 @@
+import numpy as np
+
 my_protocol = BB84(eve_intercept='yes')
 
 
@@ -42,9 +44,6 @@ my_protocol.bob_receive_no_H_circuit = circuit
 sim = cirq.DensityMatrixSimulator()
 
 circuit = cirq.Circuit()
-
-
-import numpy as np
 
 
 theta = 0

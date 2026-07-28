@@ -47,14 +47,16 @@ symbols = sympy.symbols('theta0:6')
 def build_qcl_ansatz():
 
     ansatz = cirq.Circuit()
-  
-    ansatz.append(cirq.rx(symbols[0])(signal))
-    ansatz.append(cirq.ry(symbols[1])(signal))
-    ansatz.append(cirq.rz(symbols[2])(signal))
-    ansatz.append(cirq.rx(symbols[3])(eve))
-    ansatz.append(cirq.ry(symbols[4])(eve))
-    ansatz.append(cirq.rz(symbols[5])(eve))
-    ansatz.append(cirq.CNOT(signal, eve))
+    start = 0
+    for i in range(2):
+        ansatz.append(cirq.rx(symbols[start + 0])(signal))
+        ansatz.append(cirq.ry(symbols[start + 1])(signal))
+        ansatz.append(cirq.rz(symbols[start + 2])(signal))
+        ansatz.append(cirq.rx(symbols[start + 3])(eve))
+        ansatz.append(cirq.ry(symbols[start + 4])(eve))
+        ansatz.append(cirq.rz(symbols[start + 5])(eve))
+        ansatz.append(cirq.CNOT(signal, eve))
+        start += 6
     return ansatz
 
 ansatz_circuit = build_qcl_ansatz()

@@ -102,4 +102,15 @@ for i in noise_levels:
   qcl_fid = train_qcl(i)
   qclfid.append(qcl_fid)
 
-print("Noise:", i, "PCCM:", pccmfid, "QCL:", qclfid)
+
+
+plt.plot(noise_levels, pccmfid, marker='o', color='b', label='PCCM Fidelity')
+plt.plot(noise_levels, qclfid, marker='x', color='r', label='QCL Fidelity')
+
+plt.title("QCL v pccm attack")
+plt.xlabel(" Noise")
+plt.ylabel("Eve Fidelity")
+plt.grid(True)
+plt.legend()
+plt.show()
+

@@ -3,6 +3,7 @@ import sympy
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+import random
 
 
 signal = cirq.NamedQubit('signal')
@@ -70,13 +71,13 @@ def build_qcl_ansatz():
     return ansatz
 
 ansatz_circuit = build_qcl_ansatz()
-
+target = random.uniform(0.5, 1.0)
 def qcl_loss(weights, noise):
     resolver = dict(zip(symbols, weights))
     resolved_circuit = cirq.resolve_parameters(ansatz_circuit, resolver)
     fab, fae = evaluate_circuit(resolved_circuit, noise)
 
-    loss = 10*(fab - rng.uniform(0.5, 1.0)) - fae 
+    loss = 10*(fab - target) - fae 
     return loss
 
 def train_qcl(noise):

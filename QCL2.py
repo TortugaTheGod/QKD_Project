@@ -42,7 +42,7 @@ def build_pccm():
 
 
 
-symbols = sympy.symbols('theta0:6')
+symbols = sympy.symbols('theta0:18')
 
 def build_qcl_ansatz():
 
@@ -57,6 +57,16 @@ def build_qcl_ansatz():
         ansatz.append(cirq.rz(symbols[start + 5])(eve))
         ansatz.append(cirq.CNOT(signal, eve))
         start += 6
+    """
+    if (x basis) :
+        ansatz.append(cirq.rx(symbols[12])(eve))
+        ansatz.append(cirq.ry(symbols[13])(eve))
+        ansatz.append(cirq.rz(symbols[14])(eve))
+    else :
+        ansatz.append(cirq.rx(symbols[15])(eve))
+        ansatz.append(cirq.ry(symbols[16])(eve))
+        ansatz.append(cirq.rz(symbols[17])(eve))
+    """
     return ansatz
 
 ansatz_circuit = build_qcl_ansatz()

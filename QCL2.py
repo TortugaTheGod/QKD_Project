@@ -21,6 +21,7 @@ def get_fidelities(rho_4x4):
     fae = cirq.fidelity(eve_rho, target_state)
     return fab, fae
 
+
 def evaluate_circuit(circ, noise=0.0):
     circuit = cirq.Circuit()
     circuit.append(cirq.H(signal))
@@ -32,7 +33,7 @@ def evaluate_circuit(circ, noise=0.0):
     return get_fidelities(result.final_density_matrix)
 
 def build_pccm():
-    theta=np.pi/4
+    theta=np.pi/2
     pccm = cirq.Circuit()
     pccm.append(cirq.rx(np.pi/2)(signal))
     pccm.append(cirq.ry(theta)(eve).controlled_by(signal))
@@ -49,7 +50,7 @@ def build_qcl_ansatz():
 
     ansatz = cirq.Circuit()
     start = 0
-    for i in range(2):
+    for i in range(3):
         ansatz.append(cirq.rx(symbols[start + 0])(signal))
         ansatz.append(cirq.ry(symbols[start + 1])(signal))
         ansatz.append(cirq.rz(symbols[start + 2])(signal))
@@ -82,12 +83,23 @@ def qcl_loss(weights, noise):
 
 def train_qcl(noise):
     
-    initial_weights = np.array([0, 0, 0, 0, 0, 0])
+    initial_weights = np.zeros(18)
     result = minimize(qcl_loss, initial_weights, args=(noise), method='COBYLA',options={'maxiter': 500})
     
     resolver = dict(zip(symbols, result.x))
     resolved_circuit = cirq.resolve_parameters(ansatz_circuit, resolver)
     return evaluate_circuit(resolved_circuit, noise)
 
+noise_levels = np.linspace(0.0, 0.2, 10) 
+pccmfid = []
+qclfid = []
 
-noise = np.linspace(0.0, 0.2, 10) 
+pccm_circuit = build_pccm()
+
+for i in noise_levels:
+  pccm_fid= evaluate_circuit(pccm_circuit,i)
+  pccmfid.append(pccm_fid)
+  qcl_fid = train_qcl(p)
+  qclfid.append(qcl_fid)
+
+print("Noise:", p, "PCCM:", pccmfid, "QCL:", qclfid)

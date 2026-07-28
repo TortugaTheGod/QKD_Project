@@ -8,7 +8,7 @@ import random
 
 signal = cirq.NamedQubit('signal')
 eve = cirq.NamedQubit('eve')
-sim = cirq.DensityMatrixSimulator()
+sim = cirq.DensityMatrixSimulator(dtype=np.complex128)
 
 
 target_state = np.array([1/np.sqrt(2), 1/np.sqrt(2)])
@@ -99,7 +99,7 @@ pccm_circuit = build_pccm()
 for i in noise_levels:
   pccm_fid= evaluate_circuit(pccm_circuit,i)
   pccmfid.append(pccm_fid)
-  qcl_fid = train_qcl(p)
+  qcl_fid = train_qcl(i)
   qclfid.append(qcl_fid)
 
-print("Noise:", p, "PCCM:", pccmfid, "QCL:", qclfid)
+print("Noise:", i, "PCCM:", pccmfid, "QCL:", qclfid)

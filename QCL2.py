@@ -64,7 +64,7 @@ def qcl_loss(weights, noise):
     resolved_circuit = cirq.resolve_parameters(ansatz_circuit, resolver)
     fab, fae = evaluate_circuit(resolved_circuit, noise)
 
-    loss = (fab - 
+    loss = 10*(fab - rng.uniform(0.5, 1.0)) - fae 
     return loss
 
 def train_qcl(noise):

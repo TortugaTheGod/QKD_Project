@@ -328,6 +328,7 @@ symmetric_fidelity = 0.5 * (1.0 + 1.0 / np.sqrt(2.0))
 
 target = 0.90
 
+# replace with cobyla method minimize
 symmetric_result = train_qcl(target_bob = target, alpha = 10.0, learning_rate = 0.1, steps = 100, seed = 105)
 
 print("\nSymmetric-point demonstration")
@@ -362,6 +363,7 @@ pareto_results = []
 for run_index, target in enumerate(target_values):
     print(f"\nTraining target {run_index + 1}/{len(target_values)}: {target:.6f}")
 
+    #replace with minimize
     result = train_qcl(target_bob = float(target), alpha = 10.0, learning_rate = 0.1, steps = pareto_steps, seed = 100 + run_index, verbose = False)
 
     pareto_results.append(result)

@@ -88,10 +88,13 @@ def build_qcl_ansatz():
 ansatz_circuit = build_qcl_ansatz()
 
 
-target_fidelities = [0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95]
+target_fidelities = [0.5, 0.6, 0.7, 0.8, 0.9, 1]
 alpha = 25
 
 qcl_runs = []
+
+qcl_fab = []
+qcl_fae = []
 
 for f_target in target_fidelities:
     history = []
@@ -105,5 +108,29 @@ for f_target in target_fidelities:
         return loss
 
     initial_weights = np.random.normal(0, np.pi, 18)
-    minimize(qcl_loss, initial_weights, method='COBYLA', options={'maxiter': 100})
-    qcl_runs.append(history)
+    minimize(qcl_loss, initial_weights, method='COBYLA', options={'maxiter': 500})
+    
+    final_fab, final_fae = history[-1]
+    qcl_fab.append(final_fab)
+    qcl_fae.append(final_fae)
+
+
+qcl_data = sorted(zip(qcl_fab, qcl_fae), key=lambda x: x[0])
+qcl_fab_sorted = [x[0] for x in qcl_data]
+qcl_fae_sorted = [x[1] for x in qcl_data]
+
+
+plt.figure(figsize=(7, 5))
+
+plt.plot(pccm_fab, pccm_fae, color='blue', linewidth=2, label='PCCM')
+plt.plot(qcl_fab_sorted, qcl_fae_sorted, color='orange', linewidth=2, label='QCL')
+
+plt.title("PCCM vs QCL", fontsize=12)
+plt.xlabel("Alice Bob Fidelity ", fontsize=11)
+plt.ylabel("Alice/Eve Fidelity ", fontsize=11)
+
+plt.grid(True, linestyle=":", alpha=0.6)
+plt.legend(fontsize=11)
+plt.tight_layout()
+
+plt.show()

@@ -19,7 +19,7 @@ def get_fidelities(rho_4x4, idx):
     fae = np.real(target_vec.conj() @ eve_rho @ target_vec)
     return fab, fae
 
-def evaluate_circuit(circ):
+def evaluate_circuit(circ, noise):
     total_fab, total_fae = 0.0, 0.0
     num_states = len(target_state)
     for idx in range(num_states):
@@ -35,6 +35,10 @@ def evaluate_circuit(circ):
             circuit.append(cirq.H(signal))
 
         circuit.append(circ)
+
+        if noise > 0:
+            circuit.append(cirq.depolarize(p=noise).on_each(signal, eve))
+
         result = sim.simulate(circuit, qubit_order=[signal, eve])
         fab, fae = get_fidelities(result.final_density_matrix, idx)
         total_fab += fab
@@ -98,11 +102,11 @@ qcl_fae = []
 
 for f_target in target_fidelities:
     history = []
-
+    noise_levels = np.linspace(0.0, 0.8, 140)
     def qcl_loss(weights):
         resolver = dict(zip(symbols, weights))
         resolved_circuit = cirq.resolve_parameters(ansatz_circuit, resolver)
-        fab, fae = evaluate_circuit(resolved_circuit)
+        fab, fae = evaluate_circuit(resolved_circuit, noise_levels)
         history.append((fab, fae))
         loss = alpha * ((fab - f_target) ** 2) - fae
         return loss

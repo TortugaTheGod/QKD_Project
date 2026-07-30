@@ -5,6 +5,7 @@
 
 
 import numpy as np
+import cirq
 import matplotlib.pyplot as plt
 
 
@@ -109,33 +110,11 @@ print(build_measurement_v(test_params, "Z"))
 # In[4]:
 
 
-# noise channel
-def add_channel_noise(circuit, noise_model, noise_strength):
-    if noise_model is None or noise_strength <= 0.0:
-        return
-
-    p = float(noise_strength)
-
-    if not 0.0 <= p <= 1.0:
-        raise ValueError("noise_strength must be between 0 and 1.")
-
-    if noise_model == "depolarizing":
-        circuit.append(cirq.depolarize(p).on(signal))
-    elif noise_model == "bit_flip":
-        circuit.append(cirq.bit_flip(p).on(signal))
-    elif noise_model == "phase_flip":
-        circuit.append(cirq.phase_flip(p).on(signal))
-    elif noise_model == "amplitude_damping":
-        circuit.append(cirq.amplitude_damp(p).on(signal))
-    else:
-        raise ValueError(f"noise model not supported")
-
-
-def build_attack_circuit(params, case, noise_model, noise_strength):
+def build_attack_circuit(params, case):
     circuit = cirq.Circuit()
     circuit += case["preparation"]
 
-    add_channel_noise(circuit, noise_model, noise_strength)
+    circuit.append(cirq.bit_flip(p=0.25).on(signal))
 
     circuit += build_interaction_u(params)
     circuit += build_measurement_v(params, case["basis"])
@@ -163,8 +142,10 @@ def raw_state_fidelity(rho, target_state):
     return float(np.clip(np.real(value), 0.0, 1.0))
 
 # simulate
-def simulate_case(params, case, noise_model, noise_strength):
-    circuit = build_attack_circuit(params, case, noise_model = noise_model, noise_strength=noise_strength)
+def simulate_case(params, case):
+    circuit = build_attack_circuit(params, case)
+
+    circuit.append(cirq.bit_flip(p=0.25).on(signal))
 
     result = simulator.simulate(circuit, qubit_order=[signal, eve])
 
@@ -173,18 +154,13 @@ def simulate_case(params, case, noise_model, noise_strength):
 
     return circuit, joint_rho, bob_rho, eve_rho
 
-def average_fidelities(params, noise_model, noise_strength, return_details = False):
+def average_fidelities(params, return_details = False):
     bob_scores = []
     eve_scores = []
     details = {}
 
     for case in bb84_cases:
-        _, _, bob_rho, eve_rho = simulate_case(
-            params,
-            case,
-            noise_model=noise_model,
-            noise_strength=noise_strength,
-        )
+        _, _, bob_rho, eve_rho = simulate_case(params,case)
 
         bob_score = raw_state_fidelity(bob_rho, case["target"])
 
@@ -214,7 +190,7 @@ def average_fidelities(params, noise_model, noise_strength, return_details = Fal
 rng = np.random.default_rng(42)
 initial_params = rng.normal(0.0, 0.1, size = num_params)
 
-initial_fab, initial_fae, initial_details = average_fidelities(initial_params, noise_model = "bit_flip", noise_strength = 0.25, return_details = True)
+initial_fab, initial_fae, initial_details = average_fidelities(initial_params, return_details = True)
 
 print(f"initial F_AB: {initial_fab:.6f}")
 print(f"initial F_AE: {initial_fae:.6f}")
@@ -228,10 +204,10 @@ print(initial_details)
 def loss_value(fab, fae, target_bob, alpha = 10.0):
     return float(alpha * (fab - target_bob) ** 2 - fae)
 
-def loss_and_gradient(params, target_bob, noise_model, noise_strength, alpha = 10.0):
+def loss_and_gradient(params, target_bob, alpha = 10.0):
     params = np.asarray(params, dtype=float)
 
-    fab, fae = average_fidelities(params, noise_model = noise_model, noise_strength = noise_strength)
+    fab, fae = average_fidelities(params)
 
     grad_fab = np.zeros_like(params)
     grad_fae = np.zeros_like(params)
@@ -245,8 +221,8 @@ def loss_and_gradient(params, target_bob, noise_model, noise_strength, alpha = 1
         plus[index] += shift
         minus[index] -= shift
 
-        fab_plus, fae_plus = average_fidelities(plus, noise_model = noise_model, noise_strength = noise_strength)
-        fab_minus, fae_minus = average_fidelities(minus, noise_model = noise_model, noise_strength = noise_strength)
+        fab_plus, fae_plus = average_fidelities(plus)
+        fab_minus, fae_minus = average_fidelities(minus)
 
         grad_fab[index] = 0.5 * (fab_plus - fab_minus)
         grad_fae[index] = 0.5 * (fae_plus - fae_minus)
@@ -262,7 +238,7 @@ def loss_and_gradient(params, target_bob, noise_model, noise_strength, alpha = 1
 
 
 # optimize adam
-def train_qcl(target_bob, *, alpha = 10.0, learning_rate = 0.1, steps = 100, seed = 42, initial_scale = 0.1, noise_model, noise_strength, verbose=True):
+def train_qcl(target_bob, *, alpha = 10.0, learning_rate = 0.1, steps = 100, seed = 42, initial_scale = 0.1, verbose=True):
     rng = np.random.default_rng(seed)
     params = rng.normal(0.0, initial_scale, size = num_params)
 
@@ -281,7 +257,7 @@ def train_qcl(target_bob, *, alpha = 10.0, learning_rate = 0.1, steps = 100, see
     }
 
     for step in range(1, steps + 1):
-        loss, fab, fae, gradient = loss_and_gradient(params, target_bob, alpha = alpha, noise_model = noise_model, noise_strength = noise_strength)
+        loss, fab, fae, gradient = loss_and_gradient(params, target_bob, alpha = alpha)
 
         first_moment = beta1 * first_moment + (1.0 - beta1) * gradient
         second_moment = beta2 * second_moment + (1.0 - beta2) * gradient**2
@@ -305,7 +281,7 @@ def train_qcl(target_bob, *, alpha = 10.0, learning_rate = 0.1, steps = 100, see
                 f"F_AE={fae:.6f}"
             )
 
-    final_fab, final_fae, details = average_fidelities(params, noise_model = noise_model, noise_strength = noise_strength, return_details = True)
+    final_fab, final_fae, details = average_fidelities(params, return_details = True)
 
     return {
         "params": params,
@@ -313,9 +289,7 @@ def train_qcl(target_bob, *, alpha = 10.0, learning_rate = 0.1, steps = 100, see
         "fae": final_fae,
         "details": details,
         "history": history,
-        "target_bob": target_bob,
-        "noise_model": noise_model,
-        "noise_strength": noise_strength,
+        "target_bob": target_bob
     }
 # In[8]:
 
@@ -324,7 +298,7 @@ symmetric_fidelity = 0.5 * (1.0 + 1.0 / np.sqrt(2.0))
 
 target = 0.90
 
-symmetric_result = train_qcl(target_bob = target, alpha = 10.0, learning_rate = 0.1, steps = 100, seed = 105, noise_model = "bit_flip", noise_strength = 0.25)
+symmetric_result = train_qcl(target_bob = target, alpha = 10.0, learning_rate = 0.1, steps = 100, seed = 105)
 
 print("\nSymmetric-point demonstration")
 print(f"Training target f: {target:.6f}")
@@ -358,7 +332,7 @@ pareto_results = []
 for run_index, target in enumerate(target_values):
     print(f"\nTraining target {run_index + 1}/{len(target_values)}: {target:.6f}")
 
-    result = train_qcl(target_bob = float(target), alpha = 10.0, learning_rate = 0.1, steps = pareto_steps, seed = 100 + run_index, verbose = False, noise_model = "bit_flip", noise_strength = 0.25)
+    result = train_qcl(target_bob = float(target), alpha = 10.0, learning_rate = 0.1, steps = pareto_steps, seed = 100 + run_index, verbose = False)
 
     pareto_results.append(result)
 
@@ -393,7 +367,7 @@ def build_known_pccm(theta, basis):
     return circuit
 
 
-def evaluate_known_pccm(theta, noise_model, noise_strength):
+def evaluate_known_pccm(theta):
     bob_scores = []
     eve_scores = []
 
@@ -401,7 +375,7 @@ def evaluate_known_pccm(theta, noise_model, noise_strength):
         circuit = cirq.Circuit()
         circuit += case["preparation"]
 
-        add_channel_noise(circuit, noise_model, noise_strength)
+        circuit.append(cirq.bit_flip(p=0.25).on(signal))
 
         circuit += build_known_pccm(theta, case["basis"])
 
@@ -415,7 +389,7 @@ def evaluate_known_pccm(theta, noise_model, noise_strength):
     return float(np.mean(bob_scores)), float(np.mean(eve_scores))
 
 
-pccm_check = evaluate_known_pccm(np.pi / 2.0, "bit_flip", 0.25)
+pccm_check = evaluate_known_pccm(np.pi / 2.0)
 
 print("Known PCCM at theta=pi/2:")
 print(f"F_AB={pccm_check[0]:.6f}")

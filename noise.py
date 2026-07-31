@@ -113,7 +113,6 @@ print(build_measurement_v(test_params, "Z"))
 def build_attack_circuit(params, case):
     circuit = cirq.Circuit()
     circuit += case["preparation"]
-
     circuit.append(cirq.bit_flip(p=0.25).on(signal))
 
     circuit += build_interaction_u(params)
@@ -144,8 +143,6 @@ def raw_state_fidelity(rho, target_state):
 # simulate
 def simulate_case(params, case):
     circuit = build_attack_circuit(params, case)
-
-    circuit.append(cirq.bit_flip(p=0.25).on(signal))
 
     result = simulator.simulate(circuit, qubit_order=[signal, eve])
 
@@ -374,7 +371,6 @@ def evaluate_known_pccm(theta):
     for case in bb84_cases:
         circuit = cirq.Circuit()
         circuit += case["preparation"]
-
         circuit.append(cirq.bit_flip(p=0.25).on(signal))
 
         circuit += build_known_pccm(theta, case["basis"])
